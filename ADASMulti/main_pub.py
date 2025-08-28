@@ -52,8 +52,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-#este es mi comentario
-
-
-#zijnhsijn
-#jajaja
+#jajajajajllllllllllllll
