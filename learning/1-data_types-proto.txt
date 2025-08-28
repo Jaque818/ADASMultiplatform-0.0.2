@@ -1,0 +1,70 @@
+*******************************************************************
+📚 Lección 1 — Tipos de campos en Protobuf y evolución de mensajes
+*******************************************************************
+--------------------------------------------------------------------------------------------------
+Campos simples
+
+Protobuf soporta tipos primitivos:
+string, bytes
+int32, int64, uint32, uint64, sint32, sint64 (diferencias en codificación, lo vemos más adelante)
+bool, double, float
+
+message Persona {
+  string nombre = 1;
+  int32 edad = 2;
+  bool activo = 3;
+}
+--------------------------------------------------------------------------------------------------
+Campos repetidos (repeated)
+
+Representan listas/arreglos.
+
+message Persona {
+  string nombre = 1;
+  repeated string hobbies = 2; // lista de strings
+}
+--------------------------------------------------------------------------------------------------
+Campos enumerados (enum)
+
+Enumeraciones con enteros (empiezan en 0 por convención).
+
+message Persona {
+  enum Genero {
+    GENERO_DESCONOCIDO = 0;
+    MASCULINO = 1;
+    FEMENINO = 2;
+    OTRO = 3;
+  }
+  string nombre = 1;
+  Genero genero = 2;
+}
+--------------------------------------------------------------------------------------------------
+Campos opcionales (optional) YA NO EXISTEN EN PROTO3
+
+En proto3 todos los campos tienen un valor por defecto (0, "", false).
+Pero si quieres saber si fue seteado explícitamente o no, usas optional.
+
+message Persona {
+  string nombre = 1;
+  optional string apodo = 2;
+}
+--------------------------------------------------------------------------------------------------
+Campos exclusivos (oneof)
+
+Solo puede estar uno de los campos activos a la vez.
+
+message Contacto {
+  oneof info {
+    string telefono = 1;
+    string correo = 2;
+  }
+}
+--------------------------------------------------------------------------------------------------
+Mapas (map)
+
+Diccionarios llave-valor (llave = escalar, valor = cualquier tipo).
+
+message Inventario {
+  map<string, int32> productos = 1; // nombre -> cantidad
+}
+--------------------------------------------------------------------------------------------------

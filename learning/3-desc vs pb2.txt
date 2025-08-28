@@ -1,0 +1,56 @@
+El .desc contiene un FileDescriptorSet, que básicamente es una representación binaria de tu(s)
+.proto.
+
+En palabras simples:
+
+- El .proto es texto legible por humanos.
+- El .desc es la versión compilada en binario que describe lo mismo.
+
+Ese .desc incluye:
+
+FileDescriptor → describe un archivo .proto.
+DescriptorProto → describe un message (su nombre, campos, tipos, números).
+EnumDescriptorProto → describe un enum.
+ServiceDescriptorProto → describe un servicio gRPC (si hubiera).
+
+O sea: es como tener el ADN del .proto, pero en un formato binario portátil.
+------------------------------------------------------------------------------------------------------
+¿Por qué se pueden crear objetos sin _pb2.py?
+
+Porque Protobuf en Python (y otros lenguajes) tiene un mecanismo llamado reflexión dinámica:
+
+Lees el .desc y lo cargas en un DescriptorPool.
+→ Ahora el runtime “sabe” qué mensajes existen, sus campos y tipos.
+
+Usas un MessageFactory con ese pool.
+→ La fábrica puede generar clases dinámicas basadas en la información del descriptor.
+
+Esa clase dinámica se comporta igual que la clase estática de *_pb2.py.
+
+EJEMPLO:
+
+from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
+
+# Leer el descriptor
+fds = descriptor_pb2.FileDescriptorSet()
+fds.ParseFromString(open("hello.desc", "rb").read())
+
+pool = descriptor_pool.DescriptorPool()
+for fd_proto in fds.file:
+    pool.Add(fd_proto)
+
+factory = message_factory.MessageFactory(pool)
+
+# Obtener la clase dinámica
+HelloWorld = factory.GetPrototype(pool.FindMessageTypeByName("protocolbuffers.HelloWorld"))
+
+# Crear objeto
+m = HelloWorld(msg="Hola sin pb2")
+print(m)
+-----------------------------------------------------------------------------------------------
+Cuándo prefieres .desc sobre _pb2.py
+
+Cuando distribuyes servicios y no quieres compartir el .proto original (ejemplo: gRPC reflection).
+Cuando necesitas que tu programa sea genérico y pueda trabajar con cualquier esquema, sin recompilar.
+En herramientas de análisis (linters, doc generators, proxies) que procesan mensajes sin conocer el tipo de antemano.
+En CI/CD: comparas .desc antiguos vs nuevos para validar que los cambios sean compatibles.

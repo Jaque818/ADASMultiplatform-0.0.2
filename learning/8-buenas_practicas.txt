@@ -1,0 +1,59 @@
+Buenas prácticas con Protobuf
+
+Numeración de campos (tags)
+
+Cada campo tiene un número único en el mensaje (msg = 1).
+
+Nunca cambies el número de un campo ya usado, porque rompería la compatibilidad.
+❌ Cambiar string nombre = 1; a int32 edad = 1;
+✅ Mejor: marcarlo como deprecated y crear un nuevo número.
+
+message Persona {
+  string nombre = 1;
+  int32 edad = 2;
+  string telefono = 3 [deprecated = true];
+}
+
+El campo sigue existiendo, pero ya no se usa.
+---------------------------------------------------------------------------------------
+Compatibilidad hacia atrás (backward compatibility)
+
+Puedes agregar nuevos campos sin romper los mensajes viejos.
+Los clientes viejos simplemente ignoran los campos que no conocen.
+
+message Usuario {
+  string nombre = 1;
+  string correo = 2;
+  string pais = 3; // agregado después
+}
+---------------------------------------------------------------------------------------
+Usa nombres claros y consistentes
+
+Mejor: user_id que idU.
+Los .proto suelen seguir snake_case.
+---------------------------------------------------------------------------------------
+Evita campos required
+
+En proto3 ya no existen, t0do es optional o repeated.
+La razón: required hacía muy difícil evolucionar un esquema.
+---------------------------------------------------------------------------------------
+Agrupa mensajes relacionados
+
+No hagas un .proto gigante.
+Mejor: separar en archivos lógicos (ej: user.proto, order.proto).
+Puedes importarlos con import "user.proto";.
+---------------------------------------------------------------------------------------
+Versionado
+
+Si un mensaje cambia mucho, a veces es mejor crear un nuevo mensaje.
+Ejemplo: UsuarioV1, UsuarioV2.
+---------------------------------------------------------------------------------------
+Errores comunes con Protobuf
+
+Reutilizar números de campo viejos → rompe la compatibilidad.
+Cambiar tipo de un campo (ej: de int32 a string) → genera errores de parseo.
+Olvidar inicializar campos opcionales → puede dar valores por defecto sin que te des cuenta.
+Ej: int32 edad = 0 aunque nunca lo hayas seteado.
+Usar Protobuf para t0do → a veces JSON o Avro son más simples.
+Archivos .proto desorganizados → difícil de mantener en proyectos grandes.
+---------------------------------------------------------------------------------------
