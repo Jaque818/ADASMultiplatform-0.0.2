@@ -1,8 +1,8 @@
 import cv2
 import time
 import numpy as np
-from core import imagen_pb2
-from utils import config
+from ADASMulti.core import imagen_pb2
+from ADASMulti.utils import config
 
 
 def capture_frame(cap):
