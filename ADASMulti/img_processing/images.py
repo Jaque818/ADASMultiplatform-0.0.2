@@ -1,9 +1,23 @@
 import cv2
 import time
 import numpy as np
+import platform
 from ADASMulti.core import imagen_pb2
 from ADASMulti.utils import config
 
+
+def get_optimal_backend():
+    """Elige el mejor backend para el sistema"""
+    system = platform.system()
+
+    if system == "Windows":
+        return cv2.CAP_DSHOW
+    elif system == "Linux":
+        return cv2.CAP_V4L2
+    elif system == "Darwin":
+        return cv2.CAP_AVFOUNDATION
+    else:
+        return cv2.CAP_ANY
 
 def capture_frame(cap):
     """Lee un frame de la cámara."""

@@ -1,13 +1,14 @@
 import cv2
 import time
 from interfaces.ecal_interface import EcalPublisher
-from core import img_processing
+from ADASMulti.img_processing import images
 from utils import config
 
 
 def main():
     # Inicializar cámara
-    cap = cv2.VideoCapture(config.CAMERA_INDEX)
+    backend = images.get_optimal_backend()
+    cap = cv2.VideoCapture(config.CAMERA_INDEX, backend)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT)
     cap.set(cv2.CAP_PROP_FPS, config.FPS)
@@ -27,8 +28,8 @@ def main():
         while True:
             start_time = time.time()
 
-            frame = img_processing.capture_frame(cap)
-            msg = img_processing.frame_to_proto(frame, frame_number)
+            frame = images.capture_frame(cap)
+            msg = images.frame_to_proto(frame, frame_number)
 
             size = pub.send(msg)
             print(f"[PUB] Frame {frame_number} enviado ({size} bytes)")
@@ -51,6 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-##Este es un cambio desde jaque

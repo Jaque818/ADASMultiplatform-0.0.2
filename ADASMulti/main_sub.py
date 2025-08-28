@@ -1,7 +1,8 @@
 import cv2
 import time
 from interfaces.ecal_interface import EcalSubscriber
-from core import img_processing, imagen_pb2
+from core import imagen_pb2
+from ADASMulti.img_processing import images
 from utils import config
 
 
@@ -39,8 +40,8 @@ class SubscriberApp:
         fps = (len(self.timestamps)-1) / (self.timestamps[-1] - self.timestamps[0]) if len(self.timestamps) > 1 else 0
 
         # Decodificar frame
-        frame = img_processing.proto_to_frame(msg)
-        display = img_processing.draw_overlay(frame, msg, fps=fps, latency=latency, lost=self.lost_frames)
+        frame = images.proto_to_frame(msg)
+        display = images.draw_overlay(frame, msg, fps=fps, latency=latency, lost=self.lost_frames)
 
         cv2.imshow("Subscriber", display)
         cv2.waitKey(1)
