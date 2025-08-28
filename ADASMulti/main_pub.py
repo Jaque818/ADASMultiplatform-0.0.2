@@ -51,5 +51,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#omar morales lira 12334
