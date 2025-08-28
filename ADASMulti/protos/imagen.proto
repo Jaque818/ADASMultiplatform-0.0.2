@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protocolBuffers;
+
+message VideoFrame {
+    bytes frame_data = 1;          // Datos del frame comprimido
+    int32 width = 2;               // Ancho del frame
+    int32 height = 3;              // Alto del frame
+    int32 channels = 4;            // Número de canales
+    string encoding = 5;           // Formato (jpg, png)
+    int64 frame_number = 6;        // Número de frame
+    double timestamp = 7;          // Timestamp en segundos
+    int32 compression_quality = 8; // Calidad de compresión (1-100)
+    bool is_keyframe = 9;          // Si es frame clave
+}
