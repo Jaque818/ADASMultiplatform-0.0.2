@@ -1,0 +1,82 @@
+Hasta ahora has visto .proto, protoc, mensajes, servicios, etc. Pero la magia real de Protocol
+Buffers es que el mismo archivo .proto puede ser usado en muchos lenguajes de programación.
+-------------------------------------------------------------------------------------------------
+1. ¿Por qué integración multilenguaje?
+
+Imagina un sistema distribuido:
+
+El backend está en Java.
+El frontend móvil está en Kotlin/Swift.
+Un microservicio usa Python para análisis de datos.
+Y otro módulo corre en C++ por rendimiento.
+
+Todos deben hablar el mismo idioma de datos → ahí entra Protocol Buffers.
+Solo necesitas el mismo archivo .proto y cada equipo genera su código con protoc para su lenguaje.
+-------------------------------------------------------------------------------------------------
+2. Ejemplo práctico de integración
+
+Archivo user.proto:
+
+syntax = "proto3";
+
+package tutorial;
+
+message User {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+Ahora lo compilamos en diferentes lenguajes:
+
+**********************************************************
+protoc --python_out=. user.proto
+
+from user_pb2 import User
+u = User(id=1, name="Omar", email="omar@example.com")
+print(u)
+**********************************************************
+protoc --java_out=./java_out user.proto
+
+User u = User.newBuilder()
+    .setId(1)
+    .setName("Omar")
+    .setEmail("omar@example.com")
+    .build();
+System.out.println(u);
+**********************************************************
+protoc --cpp_out=. user.proto
+
+#include "user.pb.h"
+#include <iostream>
+
+int main() {
+    tutorial::User u;
+    u.set_id(1);
+    u.set_name("Omar");
+    u.set_email("omar@example.com");
+    std::cout << u.DebugString();
+}
+**********************************************************
+Todos estos generan y consumen los mismos bytes binarios 🎉.
+Un User serializado en Python se puede enviar por socket y deserializar en C++ o Java.
+-------------------------------------------------------------------------------------------------
+3. Comunicación real multilenguaje
+
+Lo que se hace normalmente es:
+
+Definir .proto (contrato común).
+Cada servicio genera sus clases con protoc.
+Un servicio (ej. Python) serializa el objeto y lo manda → otro servicio (ej. Java) lo recibe y lo interpreta.
+
+Así logras que diferentes lenguajes trabajen juntos sin importar si son dinámicos o compilados.
+-------------------------------------------------------------------------------------------------
+Con gRPC este patrón es aún más fuerte, porque protoc genera no solo las clases de mensajes, sino también:
+
+El cliente (stub).
+El servidor (base a implementar).
+
+Ejemplo: defines un servicio UserService en .proto.
+Puedes implementarlo en Python y consumirlo con un cliente en Java o C++,
+t0do transparente gracias a protoc.
+-------------------------------------------------------------------------------------------------

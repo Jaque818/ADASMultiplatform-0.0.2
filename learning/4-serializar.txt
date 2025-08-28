@@ -1,0 +1,43 @@
+1. Crear un objeto y llenarlo
+
+Supongamos tu mensaje es:
+
+syntax = "proto3";
+package ProtocolBuffers;
+
+message HelloWorld {
+    string msg = 1;
+}
+
+Tu código en Python sería:
+
+from generated import hello_pb2  # tu archivo generado
+
+# Crear objeto
+mensaje = hello_pb2.HelloWorld()
+mensaje.msg = "Hola desde Protocol Buffers 🚀"
+-----------------------------------------------------------------------
+2. Serializar a bytes
+
+# Serializar a bytes
+data = mensaje.SerializeToString()
+print("Mensaje serializado:", data)
+
+Esto convierte tu objeto en una secuencia compacta de bytes que puede viajar por la red, guardarse en un archivo, etc.
+--------------------------------------------------------------------------
+3. Deserializar desde bytes
+
+# Crear otro objeto vacío
+nuevo_mensaje = hello_pb2.HelloWorld()
+
+# Llenarlo a partir de los bytes
+nuevo_mensaje.ParseFromString(data)
+
+print("Mensaje deserializado:", nuevo_mensaje.msg)
+----------------------------------------------------------------------------------
+4. Usos típicos
+
+Comunicación entre procesos o servicios: Envías los bytes por sockets, gRPC, eCal, Kafka, etc.
+Almacenamiento: Guardas los bytes en un archivo o base de datos compacta.
+Interoperabilidad: Otro lenguaje (Java, C++, Go, etc.) puede leer esos mismos bytes si tiene el .proto.
+-----------------------------------------------------------------------------------

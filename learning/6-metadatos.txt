@@ -1,0 +1,85 @@
+🔹 ¿Qué son las options en Protobuf?
+
+Las options son metadatos adicionales que puedes agregar a:
+
+- Archivos .proto
+- Mensajes
+- Campos
+- Servicios (si usas gRPC)
+
+Piensa en ellas como anotaciones que no cambian el contenido del mensaje en sí,
+pero que influyen en cómo se comporta, se genera el código o se interpreta.
+--------------------------------------------------------------------------------------------
+🔹 Tipos de options que existen
+
+Hay tres niveles principales:
+
+1 - File options → afectan al archivo completo.
+Ejemplo: el nombre del paquete de salida para Java o C#.
+
+syntax = "proto3";
+
+option java_package = "com.example.myapp";
+option java_outer_classname = "HelloProto";
+
+message Hello {
+  string msg = 1;
+}
+
+Eso no cambia el .pb2.py (Python ignora estas opciones), pero en Java sí controla dónde se genera el archivo.
+--------------------------------------------------------------------------------------------
+2 - Message options → afectan a un mensaje completo.
+Ejemplo: puedes marcar un mensaje como deprecated (obsoleto).
+
+message Hello {
+  option deprecated = true;  // advierte que no uses este mensaje Hello
+  string msg = 1;
+}
+--------------------------------------------------------------------------------------------
+3 - Field options → afectan a un campo dentro de un mensaje.
+Ejemplo: marcar un campo como obsoleto:
+
+message Hello {
+  string msg = 1 [deprecated = true];
+}
+
+Eso no elimina el campo, solo hace que el compilador/generador te avise que ya no deberías usarlo.
+--------------------------------------------------------------------------------------------
+🔹 Opciones personalizadas
+
+Aquí viene lo interesante 😎
+Protobuf también te deja definir tus propias opciones.
+Por ejemplo, imagina que quieres marcar ciertos campos como "encriptables":
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FieldOptions {
+  bool encrypted = 51234;
+}
+
+message User {
+  string name = 1;
+  string password = 2 [(encrypted) = true];
+}
+
+Con eso:
+En tu aplicación, cuando cargues el .desc, podrías detectar si un campo tiene la opción encrypted = true.
+Así, podrías aplicar lógica de seguridad automática en lugar de escribir código manual.
+Esto se usa mucho en frameworks grandes que quieren agregar semántica adicional sin tener que
+modificar protobuf como tal.
+--------------------------------------------------------------------------------------------
+🔹 ¿Dónde entra esto en eCal o tu caso?
+
+En eCal, cuando importas un .desc, no solo sabe cómo parsear los mensajes, sino que también puede mostrar estos metadatos extra.
+Por ejemplo:
+
+Ver que un campo está marcado como deprecated.
+Ver si un repeated está en modo packed.
+Usar tus propias options personalizadas para que tu sistema interprete campos de cierta forma.
+--------------------------------------------------------------------------------------------
+✅ En resumen:
+
+Options = metadatos/anotaciones en protobuf.
+Hay options estándar (optimización, namespaces, deprecated, packed…).
+Puedes crear options personalizadas para agregar reglas/lógica a tus mensajes.
+Herramientas como eCal o tu propio código usando .desc pueden leer esas opciones para actuar en consecuencia.

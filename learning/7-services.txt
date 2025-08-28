@@ -1,0 +1,100 @@
+Servicios en Protocol Buffers (RPC / gRPC).
+
+Hasta ahora, hemos trabajado con mensajes (message) en Protobuf.
+Pero Protobuf no solo sirve para definir estructuras de datos, también permite
+describir servicios que exponen métodos de comunicación entre procesos.
+-------------------------------------------------------------------------------------------
+¿Qué es un service en Protobuf?
+
+En un archivo .proto, además de mensajes, puedes definir un servicio con sus métodos RPC
+(Remote Procedure Call).
+
+Ejemplo básico:
+syntax = "proto3";
+
+package tutorial;
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+¿Qué significa?
+
+service Greeter: define un servicio llamado Greeter.
+rpc SayHello: define un método remoto llamado SayHello.
+(HelloRequest) returns (HelloReply):
+    El cliente envía un HelloRequest.
+    El servidor responde con un HelloReply.
+
+En pocas palabras:
+messages → definen los datos.
+service → define las operaciones.
+rpc → define cómo se comunican cliente y servidor.
+-------------------------------------------------------------------------------------------
+gRPC y Protobuf
+
+gRPC usa Protobuf como su lenguaje de definición por defecto.
+Cuando ejecutas protoc con los plugins de gRPC, se generan stubs de cliente y servidor en
+el lenguaje que elijas.
+
+Ejemplo de comandos (en Python):
+# Generar clases normales de Protobuf
+protoc --python_out=. hello.proto
+
+# Generar clases + código gRPC (cliente y servidor)
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. hello.proto
+
+Esto genera:
+hello_pb2.py → mensajes (HelloRequest, HelloReply).
+hello_pb2_grpc.py → código de cliente/servidor (GreeterServicer, GreeterStub).
+-------------------------------------------------------------------------------------------
+Tipos de RPC en gRPC
+
+Hay 4 formas de comunicación RPC en gRPC:
+
+Unary RPC (uno a uno)
+Cliente envía un mensaje → servidor responde un mensaje.
+rpc SayHello(HelloRequest) returns (HelloReply);
+Ejemplo: login, consulta simple.
+
+Server Streaming RPC (uno a muchos)
+Cliente envía un mensaje → servidor responde una secuencia.
+rpc GetUpdates(Empty) returns (stream Update);
+Ejemplo: notificaciones, logs en tiempo real.
+
+Client Streaming RPC (muchos a uno)
+Cliente envía varios mensajes → servidor responde uno.
+rpc UploadLogs(stream LogEntry) returns (UploadStatus);
+Ejemplo: subir partes de un archivo.
+
+Bidirectional Streaming RPC (muchos a muchos)
+Cliente y servidor envían secuencias simultáneamente.
+rpc Chat(stream ChatMsg) returns (stream ChatMsg);
+Ejemplo: chat en tiempo real.
+
+Diferencia clave
+Los mensajes (message) definen qué datos viajan.
+Los servicios (service) definen qué métodos existen y cómo se comunican.
+-------------------------------------------------------------------------------------------
+QUE ES UN STUB
+
+En el contexto de Protocol Buffers, un "stub" se refiere al código del lado del cliente que
+se genera automáticamente a partir de un archivo .proto y actúa como un intermediario para
+comunicarse con un servicio remoto (generalmente a través de gRPC). Este stub encapsula la
+lógica para enviar y recibir mensajes de un servicio, ocultando los detalles de bajo nivel
+de la comunicación de red, permitiendo que las aplicaciones cliente realicen llamadas a
+procedimientos remotos como si fueran llamadas a métodos locales.
+
+Un stub en Protobuf es una representación de cliente de un servicio remoto que facilita la
+comunicación. Actúa como un puente que permite al cliente interactuar con un servicio sin
+tener que manejar directamente los detalles de la serialización de datos y la transmisión
+de red, lo que simplifica enormemente el desarrollo de aplicaciones distribuidas.
+

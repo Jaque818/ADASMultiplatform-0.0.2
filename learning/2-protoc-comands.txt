@@ -1,0 +1,37 @@
+*******************************
+        Comandos Protoc
+*******************************
+
+-------------------------------------------------------------------------------------------------------
+protoc -I=protos --python_out=generated protos/hello.proto
+
+-I → directorio raíz para resolver import.
+--python_out=DIR → genera clases Python.
+Cambia _out por --cpp_out, --java_out, --go_out, etc. Dependiendo el lenguaje
+------------------------------------------------------------------------------------------------------
+--grpc_python_out=generated
+
+te genera el stubs de gRPC (cliente/servidor).
+un stub es -> objeto generadado automáticamente en el lado del cliente que actúa como un
+intermediario entre la aplicación cliente y el servicio gRPC remoto.
+-----------------------------------------------------------------------------------------------------
+protoc --include_imports --include_source_info --descriptor_set_out=hello.desc hello.proto
+
+Esto genera un archivo binario con la descripción del esquema (tipo metadatos).
+Sirve para:
+Reflexión: otros lenguajes/herramientas pueden leer el esquema sin necesidad del .proto.
+Dinamismo: librerías que cargan descriptores en runtime para procesar mensajes sin generar código.
+Compatibilidad: por ejemplo, gRPC necesita a veces el .desc para pruebas o proxy inverso.
+
+Flags relacionados:
+--descriptor_set_out=FILE → nombre del archivo .desc.
+--include_imports → incluye todos los .proto importados en el descriptor (muy útil).
+--include_source_info → añade comentarios y metadata (útil para documentación).
+--------------------------------------------------------------------------------------------------
+protoc --decode_raw < hello.desc
+
+4. Depurar el AST (árbol de sintaxis)
+Generar el descriptor en texto legible:
+protoc --decode=google.protobuf.FileDescriptorSet \
+       google/protobuf/descriptor.proto < hello.desc
+--------------------------------------------------------------------------------------------------

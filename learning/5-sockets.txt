@@ -1,0 +1,81 @@
+Comunicación entre procesos o servicios con Protocol Buffers
+
+Cuando defines un .proto y generas tus clases (*_pb2.py, *_pb2.java, etc.), en realidad lo que tienes
+es una representación estructurada de datos que se convierte a bytes binarios.
+Esos bytes son lo que realmente se envía entre procesos o servicios.
+
+La forma de enviarlos depende del middleware o tecnología de comunicación que uses:
+--------------------------------------------------------------------------------------------------
+1. Sockets TCP/UDP (nivel básico)
+
+Usas sockets tradicionales de red.
+
+El flujo es:
+# lado cliente
+msg = HelloWorld(msg="Hola mundo")
+sock.send(msg.SerializeToString())  # envías bytes
+
+# lado servidor
+data = sock.recv(1024)
+msg = HelloWorld()
+msg.ParseFromString(data)  # reconstruyes el objeto
+
+Es bajo nivel → tú controlas todo' (conexión, reintentos, buffering).
+📌 Útil cuando quieres máximo control y no necesitas un framework pesado.
+----------------------------------------------------------------------------------------------------
+2. gRPC (basado en HTTP/2)
+
+Es el framework oficial de Google que usa Protobuf.
+A partir del .proto, no solo se generan mensajes (*_pb2.py) sino también stubs de servicio
+(*_pb2_grpc.py).
+
+Permite llamadas tipo:
+
+Unary (una petición → una respuesta).
+Streaming (peticiones/respuestas en flujo continuo).
+Internamente, usa HTTP/2, soporta TLS, balanceo de carga, deadlines, etc.
+
+📌 Es ideal para microservicios porque estandariza mucho de la comunicación.
+----------------------------------------------------------------------------------------------------
+3. eCAL (Enhanced Communication Abstraction Layer)
+
+Es un middleware de comunicación interprocesos (muy usado en robótica e IoT).
+Funciona como un pub/sub distribuido.
+
+Los mensajes Protobuf se publican en un tópico:
+pub.send(msg.SerializeToString())
+
+Y los subscriptores los reciben, parsean y usan el .desc o el .proto para saber cómo interpretarlos.
+
+📌 Es útil para sistemas que corren en tiempo real o distribuidos en varias máquinas.
+----------------------------------------------------------------------------------------------------
+4. Kafka / RabbitMQ (Message Brokers)
+
+En vez de enviar el mensaje directo, lo mandas a un broker (un servidor que distribuye mensajes).
+
+Kafka, por ejemplo:
+Productor envía: producer.send("topic", msg.SerializeToString())
+Consumidor recibe: msg.ParseFromString(record.value)
+
+Ventajas:
+Persistencia (los mensajes no se pierden).
+Escalabilidad masiva (cientos de miles de mensajes por segundo).
+Integración con múltiples lenguajes y servicios.
+
+📌 Muy usado en sistemas grandes de procesamiento de datos, eventos o microservicios.
+----------------------------------------------------------------------------------------------------
+5. Otros escenarios
+
+Archivos: puedes guardar mensajes serializados en disco.
+Memoria compartida: dos procesos leen/escriben un buffer en RAM.
+REST/HTTP tradicional: conviertes el mensaje a JSON (usando MessageToJson) y lo envías por HTTP.
+----------------------------------------------------------------------------------------------------
+En resumen:
+
+Sockets → control total, pero manual.
+gRPC → estándar moderno para microservicios.
+eCAL → ideal para robots, simulaciones, sistemas distribuidos en tiempo real.
+Kafka/RabbitMQ → mensajería robusta y escalable.
+
+📌 El .proto → define el idioma común.
+📌 El transporte (sockets, gRPC, eCal, Kafka) → define cómo viaja ese idioma entre procesos/servicios.
