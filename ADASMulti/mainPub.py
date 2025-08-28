@@ -1,7 +1,7 @@
 import cv2
 import time
-from interfaces.ecal_interface import EcalPublisher
-from core import img_processing
+from interfaces.ecalInterface import EcalPublisher
+from core import imgProcessing
 from utils import config
 
 
@@ -51,6 +51,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-##Este es un cambio desde jaque

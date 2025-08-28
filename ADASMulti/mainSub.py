@@ -1,7 +1,7 @@
 import cv2
 import time
-from interfaces.ecal_interface import EcalSubscriber
-from core import img_processing, imagen_pb2
+from interfaces.ecalInterface import EcalSubscriber
+from core import imgProcessing, imagenPb2
 from utils import config
 
 
